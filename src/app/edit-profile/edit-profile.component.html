@@ -1,0 +1,29 @@
+<div class="edit-profile-container">
+  <!-- Profile Section -->
+  <div class="profile-info mt-10 text-center">
+    <h2 class="profile-header">Your Profile</h2>
+    <img
+      [src]="
+        generatedUserData?.profilePic || 'assets/images/default-avatar.jpg'
+      "
+      alt="Profile Picture"
+      class="profile-pic"
+    />
+    <!-- <p class="user-id">User ID: {{ userId }}</p> -->
+    <p class="username">Username: {{ generatedUserData.username }}</p>
+  </div>
+  <div
+    id="googleSignInDiv"
+    class="mt-2 w-full border-0"
+    *ngIf="!signedIn || generatedUserData.isVerified !== 'true'"
+  ></div>
+  <!-- Development Message -->
+  <!-- <div class="development-message">
+    <p>
+      The Edit Profile functionality is under development and will be
+      available soon! Stay tuned.
+      Or Just add the code. Source Code in About Section.
+      Coding is easy and you are smart !!!
+    </p>
+  </div> -->
+</div>
