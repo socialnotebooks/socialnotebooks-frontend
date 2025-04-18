@@ -1,7 +1,6 @@
 import { Component, OnInit, EventEmitter, Output, Inject } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatDialog } from "@angular/material/dialog";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { FeedService } from "../../services/feed.service";
 import { SharedService } from "../../services/shared.service";
 import { LikesPopupComponent } from "../likes-popup/likes-popup.component";
@@ -23,29 +22,26 @@ export class CommentsPopupComponent implements OnInit {
   profilePic: string | null;
   isLiked: boolean = false;
 
-  // Variables for inline editing
-  editingCommentId: string | null = null;
-  editingCommentContent: string = "";
-
   constructor(
     private sharedService: SharedService,
     private feedService: FeedService,
     private router: Router,
     private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) private data: any
   ) {
     this.feed = data;
     this.userId = this.getCookie("userId");
     this.username = this.getCookie("username");
     this.profilePic = this.getCookie("profilePic");
-  }
 
-  ngOnInit(): void {
     this.getPostComments(this.feed.postId);
     this.getPostLikes(this.feed.postId);
   }
 
-  getPostComments(postId: string): void {
+  ngOnInit(): void {}
+
+  /** GET comments for a post */
+  getPostComments(postId: string) {
     this.feedService.getPostComments(postId).subscribe(
       (response: any) => {
         this.commentData = response;
@@ -54,7 +50,8 @@ export class CommentsPopupComponent implements OnInit {
     );
   }
 
-  getPostLikes(postId: string): void {
+  /** GET likes for a post */
+  getPostLikes(postId: string) {
     this.feedService.getPostLikes(postId).subscribe(
       (response: any) => {
         this.likesData = response;
@@ -66,9 +63,10 @@ export class CommentsPopupComponent implements OnInit {
     );
   }
 
-  // Post a new comment.
-  commentPost(): void {
+  /** POST a new comment */
+  commentPost() {
     if (!this.comment.trim()) return;
+
     const commentData = {
       postId: this.feed.postId,
       commentAuthorId: this.userId,
@@ -76,6 +74,7 @@ export class CommentsPopupComponent implements OnInit {
       userProfileUrl: this.profilePic,
       commentContent: this.comment,
     };
+
     this.feedService.postComment(commentData).subscribe(
       () => {
         this.comment = "";
@@ -86,54 +85,41 @@ export class CommentsPopupComponent implements OnInit {
     );
   }
 
-  // Called when the user clicks "Edit" on a comment.
-  startEditing(comment: any): void {
-    this.editingCommentId = comment.commentId;
-    this.editingCommentContent = comment.commentContent;
+  /** UPDATE a comment */
+  updateComment(commentId: string, newContent: string) {
+    const updateData = { commentContent: newContent };
+
+    this.feedService.updatePostComment(commentId, updateData).subscribe(
+      () => this.getPostComments(this.feed.postId),
+      (error) => console.error("Error updating comment:", error)
+    );
   }
 
-  // Cancel inline editing.
-  cancelEditing(): void {
-    this.editingCommentId = null;
-    this.editingCommentContent = "";
-  }
-
-  // Save the edited comment.
-  saveEditing(commentId: string): void {
-    if (!this.editingCommentContent.trim()) return;
-    this.feedService
-      .updatePostComment(commentId, this.editingCommentContent)
-      .subscribe(
-        () => {
-          this.getPostComments(this.feed.postId);
-          this.cancelEditing();
-        },
-        (error) => console.error("Error updating comment:", error)
-      );
-  }
-
-  // Delete a comment.
-  deleteComment(commentId: string): void {
+  /** DELETE a comment */
+  deleteComment(commentId: string) {
     this.feedService.deletePostComment(commentId).subscribe(
       () => this.getPostComments(this.feed.postId),
       (error) => console.error("Error deleting comment:", error)
     );
   }
 
-  likePost(): void {
+  /** LIKE/UNLIKE a post */
+  likePost() {
     const likeData = {
       postId: this.feed.postId,
       likeAuthorId: this.userId,
       likeAuthorUsername: this.username,
       userProfileUrl: this.profilePic,
     };
+
     this.feedService.likeUnlikePost(likeData).subscribe(
       () => this.getPostLikes(this.feed.postId),
       (error) => console.error("Error liking/unliking post:", error)
     );
   }
 
-  showLikes(): void {
+  /** Show likes popup */
+  showLikes() {
     this.dialog
       .open(LikesPopupComponent, {
         width: "400px",
@@ -143,6 +129,7 @@ export class CommentsPopupComponent implements OnInit {
       .subscribe(() => this.getPostLikes(this.feed.postId));
   }
 
+  /** Helper function: Get cookies */
   getCookie(name: string): string | null {
     const nameEQ = `${name}=`;
     const ca = document.cookie.split(";");
