@@ -1,20 +1,15 @@
-import { Component, OnInit } from "@angular/core";
-import { SharedService } from "../services/shared.service";
+import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: "app-profile",
-  templateUrl: "./profile.component.html",
-  styleUrls: ["./profile.component.css"],
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
-  profilePic: string | null = null;
 
-  constructor(private sharedService: SharedService) {}
+  constructor() { }
 
   ngOnInit(): void {
-    // Subscribe to profile picture updates
-    this.sharedService.getProfilePic().subscribe((pic) => {
-      this.profilePic = pic;
-    });
   }
+
 }
